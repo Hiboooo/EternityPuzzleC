@@ -2,10 +2,12 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define NIVEAU 6 // 4-7
+//#define NIVEAU 6 // 4-7
 
 typedef struct CoordPiece CoordPiece;
 struct CoordPiece{int x; int y;};
+
+int NIVEAU = 4;
 
 // genere le plateau
 void generePlateau(int[NIVEAU][NIVEAU][4]);
@@ -35,6 +37,8 @@ int main(int argc, char *argv[])
   printf("Hello Word\n");
   printf("Projet de licence 2\n");
   printf("Par Quentin Germain et Thibault Dupré\n");
+
+  scanf("%d",&NIVEAU);
 
   int plateau[NIVEAU][NIVEAU][4];
 
@@ -126,14 +130,9 @@ void affichePlateau(int plateau[NIVEAU][NIVEAU][4])
 
 char getChar(int t)
 {
-  switch (t)
-  {
-    case 0: return 'A';
-    case 1: return 'B';
-    case 2: return 'C';
-    case 3: return 'D';
-    default: return 'X';
-  }
+  if (t>=0&&t<=3)
+    return 'A'+t;
+  return 'X';
 }
 
 void generePlateau(int plateau[NIVEAU][NIVEAU][4])
