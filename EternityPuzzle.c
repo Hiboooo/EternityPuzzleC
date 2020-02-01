@@ -4,6 +4,9 @@
 
 #define NIVEAU 6 // 4-7
 
+typedef struct CoordPiece CoordPiece;
+struct CoordPiece{int x; int y;};
+
 // genere le plateau
 void generePlateau(int[NIVEAU][NIVEAU][4]);
 // recherche la premiere place vide d'une piece (-1 si aucune place)
@@ -18,7 +21,13 @@ char getChar(int);
 void echangePiece(int[NIVEAU][NIVEAU][4],int,int,int,int);
 // fait tourner la piece
 void rotationPiece(int[NIVEAU][NIVEAU][4],int,int);
-
+// -1 si pas terminer
+int puzzleTermine(int[NIVEAU][NIVEAU][4]);
+// jeu
+int choixJoueur();
+void choisirEtiquette(int[NIVEAU][NIVEAU][4],CoordPiece*);
+void tournerJoueur(int[NIVEAU][NIVEAU][4]);
+void echangerJoueur(int[NIVEAU][NIVEAU][4]);
 
 int main(int argc, char *argv[])
 {
@@ -30,17 +39,72 @@ int main(int argc, char *argv[])
   int plateau[NIVEAU][NIVEAU][4];
 
   generePlateau(plateau);
-  affichePlateau(plateau);
-  echangePiece(plateau,0,0,1,1);
-  affichePlateau(plateau);
-  rotationPiece(plateau,0,0);
-  affichePlateau(plateau);
+
+  do
+  {
+    affichePlateau(plateau);
+    if (choixJoueur()==1)
+      tournerJoueur(plateau);
+    else
+      echangerJoueur(plateau);
+  } while (puzzleTermine(plateau)==-1);
+
+  printf("\n\nBien Jouer mon cher, tu as gagné!!!");
+
   putchar('\n');
+}
+
+int choixJoueur()
+{
+  int choix;
+  do
+  {
+    printf("Voulez-vous faire tourner une pièce ou en échanger deux ?\n");
+    printf("1. Tourner\n2. Echanger\nVotre choix (1/2) : ");
+    scanf("%d", &choix);
+  } while (choix!=1&&choix!=2);
+  return choix;
+}
+
+void choisirEtiquette(int plateau[NIVEAU][NIVEAU][4],CoordPiece* cp)
+{
+  printf("\nchoisis ta piece :");
+  int choix;
+  do
+  {
+    affichePlateau(plateau);
+    printf("\nVotre nombre (1-%d) : ",NIVEAU);
+    scanf("%d", &choix);
+  } while (choix<1||choix>NIVEAU);
+  cp->x = choix;
+  char lettre;
+  do
+  {
+    affichePlateau(plateau);
+    printf("Votre lettre (a-%c) : ",'a'+NIVEAU-1);
+    scanf("%c", &lettre);
+  } while (lettre<'a'||lettre>'a'+NIVEAU-1);
+  cp->y = lettre-'a'+1;
+}
+
+void tournerJoueur(int plateau[NIVEAU][NIVEAU][4])
+{
+  CoordPiece cp;
+  choisirEtiquette(plateau,&cp);
+  rotationPiece(plateau,cp.x-1,cp.y-1);
+}
+
+void echangerJoueur(int plateau[NIVEAU][NIVEAU][4])
+{
+  CoordPiece cp[2];
+  choisirEtiquette(plateau,cp);
+  choisirEtiquette(plateau,cp+1);
+  echangePiece(plateau,cp[0].x-1,cp[0].y-1,cp[1].x-1,cp[1].y-1);
 }
 
 void affichePlateau(int plateau[NIVEAU][NIVEAU][4])
 {
-  printf("\n   ");
+  printf("\n-------------------------\n   ");
   for (int t=0; t<NIVEAU; t++)
     printf(" %d ",t+1);
   putchar('\n');
@@ -57,6 +121,7 @@ void affichePlateau(int plateau[NIVEAU][NIVEAU][4])
       printf(" %c ",getChar(plateau[h][t][2]));
     putchar('\n');
   }
+  printf("-------------------------\n");
 }
 
 char getChar(int t)
@@ -86,6 +151,10 @@ void generePlateau(int plateau[NIVEAU][NIVEAU][4])
         plateau[t][h][prpl] = n; // met la data dans a cette place
         *corresp(plateau,t,h,prpl) = n; // met aussi la data dans la case correspondante
       }
+  for (int t=0; t<1000; t++)
+    echangePiece(plateau,rand()%NIVEAU,rand()%NIVEAU,rand()%NIVEAU,rand()%NIVEAU);
+  for (int t=0; t<1000; t++)
+    rotationPiece(plateau,rand()%NIVEAU,rand()%NIVEAU);
 }
 
 int premierePlace(int piece[4])
@@ -132,4 +201,14 @@ void rotationPiece(int plateau[NIVEAU][NIVEAU][4],int x, int y)
     temp[t] = plateau[x][y][t];
   for (int t=0; t<4; t++)
     plateau[x][y][(t+1)%4] = temp[t];
+}
+
+int puzzleTermine(int plateau[NIVEAU][NIVEAU][4])
+{
+  for (int t=0; t<NIVEAU; t++)
+    for (int h=0; h<NIVEAU; h++)
+      for (int i=0; i<4; i++)
+        if (plateau[t][h][i]!=*corresp(plateau,t,h,i))
+          return -1;
+  return 0;
 }
