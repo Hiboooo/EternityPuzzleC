@@ -14,6 +14,11 @@ int* corresp(int[NIVEAU][NIVEAU][4],int, int, int);
 void affichePlateau(int[NIVEAU][NIVEAU][4]);
 // converti les datas pour l'affichage
 char getChar(int);
+//echange des pieces
+void echangePiece(int[NIVEAU][NIVEAU][4],int,int,int,int);
+// fait tourner la piece
+void rotationPiece(int[NIVEAU][NIVEAU][4],int,int);
+
 
 int main(int argc, char *argv[])
 {
@@ -26,7 +31,10 @@ int main(int argc, char *argv[])
 
   generePlateau(plateau);
   affichePlateau(plateau);
-
+  echangePiece(plateau,0,0,1,1);
+  affichePlateau(plateau);
+  rotationPiece(plateau,0,0);
+  affichePlateau(plateau);
   putchar('\n');
 }
 
@@ -104,4 +112,24 @@ int* corresp(int plateau[NIVEAU][NIVEAU][4],int x, int y, int z)
   z = (z<2)? z+2: z-2;
 
   return &(plateau[x][y][z]);
+}
+
+void echangePiece(int plateau[NIVEAU][NIVEAU][4],int x1,int y1,int x2,int y2)
+{
+  int temp[4];
+  for (int t=0; t<4; t++)
+    temp[t] = plateau[x1][y1][t];
+  for (int t=0; t<4; t++)
+    plateau[x1][y1][t] = plateau[x2][y2][t];
+  for (int t=0; t<4; t++)
+    plateau[x2][y2][t] = temp[t];
+}
+
+void rotationPiece(int plateau[NIVEAU][NIVEAU][4],int x, int y)
+{
+  int temp[4];
+  for (int t=0; t<4; t++)
+    temp[t] = plateau[x][y][t];
+  for (int t=0; t<4; t++)
+    plateau[x][y][(t+1)%4] = temp[t];
 }
