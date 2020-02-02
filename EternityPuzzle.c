@@ -64,13 +64,13 @@ int main(int argc, char *argv[])
 
 void init()
 {
-  printf("\nHello Word\n");
+  printf("\nBonjour, bienvenue dans EternityPuzzleC\n");
   printf("Projet de licence 2\n");
   printf("Par Quentin Germain et Thibault Dupré\n");
 
   do
   {
-    printf("\nQu'elle affichage voulez vous ?");
+    printf("\nQuel affichage voulez-vous ?");
     printf("\n1. Amélioré (Belle mise en forme + couleur)");
     printf("\n2. Normal");
     printf("\nVotre choix (1/2) : ");
@@ -79,7 +79,7 @@ void init()
 
   do
   {
-    printf("\nQu'elle mode de jeux ?");
+    printf("\nQuel mode de jeux ?");
     printf("\n1. Mode connaisseur");
     printf("\n2. Mode didatique");
     printf("\nVotre choix (1/2) : ");
@@ -88,7 +88,7 @@ void init()
 
   do
   {
-    printf("\nQu'elle est la taille de votre plateau (2-7) : ");
+    printf("\nQuelle est la taille de votre plateau (2-7) : ");
     scanf("%d",&NIVEAU);
   } while(NIVEAU<2||NIVEAU>7);
 }
@@ -134,9 +134,9 @@ void play()
   } while (puzzleTermine(plateau)==-1);
 
   affichePlateau(plateau);
-  printf("\n\nBien Jouer mon cher, "
-           "\nAvec Un total de %d rotations et %d échanges,"
-           "\nTU AS GAGNEE!!!\n",nbRot,nbEch);
+  printf("\n\nBien Joué mon cher, "
+           "\nAvec un total de %d rotations et %d échanges,"
+           "\nTU AS GAGNE!!!\n",nbRot,nbEch);
 }
 
 int choixJoueur()
@@ -153,7 +153,7 @@ int choixJoueur()
 
 void choisirEtiquette(int plateau[NIVEAU][NIVEAU][4],CoordPiece* cp)
 {
-  printf("\nchoisis ta piece :");
+  printf("\nchoisis ta pièce :");
   int choix;
   do
   {
