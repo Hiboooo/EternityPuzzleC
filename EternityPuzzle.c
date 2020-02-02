@@ -6,20 +6,20 @@
 typedef struct CoordPiece CoordPiece;
 struct CoordPiece{int x; int y;};
 
-int NIVEAU = 4;
+int NIVEAU;
+int AFFPLATEAU;
+int CONNAISSEUR;
 
+// presentation+initialisation
+void init();
+// lance le jeu
+void play();
 // genere le plateau
 void generePlateau(int[NIVEAU][NIVEAU][4]);
 // recherche la premiere place vide d'une piece (-1 si aucune place)
 int premierePlace(int[4]);
 // retourne la case mémoire de la case correspondante a la case de coordonné x y z
 int* corresp(int[NIVEAU][NIVEAU][4],int, int, int);
-// affiche le plateau pour ide et windows
-void affichePlateauAvant(int[NIVEAU][NIVEAU][4]);
-char getChar(int);
-// affiche le plateau avec mise en forme et couleur
-void affichePlateau(int[NIVEAU][NIVEAU][4]);
-void getCharN(int[NIVEAU][NIVEAU][4],int, int, int, char[10]);
 //echange des pieces
 void echangePiece(int[NIVEAU][NIVEAU][4],int,int,int,int);
 // fait tourner la piece
@@ -32,37 +32,111 @@ void choisirEtiquette(int[NIVEAU][NIVEAU][4],CoordPiece*);
 void tournerJoueur(int[NIVEAU][NIVEAU][4]);
 void echangerJoueur(int[NIVEAU][NIVEAU][4]);
 
+// -- l'affichage du tableau
+void affichePlateau(int[NIVEAU][NIVEAU][4]);
+// affiche le plateau pour ide et windows
+void affichePlateauSta(int[NIVEAU][NIVEAU][4]);
+char getChar(int);
+// affiche le plateau avec mise en forme et couleur
+void affichePlateauAme(int[NIVEAU][NIVEAU][4]);
+void getCharN(int[NIVEAU][NIVEAU][4],int, int, int, char[10]);
+// --
 
 int main(int argc, char *argv[])
 {
   srand(time(NULL));
-  printf("Hello Word\n");
+
+  char t;
+  do
+  {
+    init();
+    play();
+
+    while (getchar() != '\n') ;
+
+    printf("\n\nRecommencer (O/N): ");
+    scanf("%c",&t);
+  } while (t!='N');
+
+
+  putchar('\n');
+}
+
+void init()
+{
+  printf("\nHello Word\n");
   printf("Projet de licence 2\n");
   printf("Par Quentin Germain et Thibault Dupré\n");
+
+  do
+  {
+    printf("\nQu'elle affichage voulez vous ?");
+    printf("\n1. Amélioré (Belle mise en forme + couleur)");
+    printf("\n2. Normal");
+    printf("\nVotre choix (1/2) : ");
+    scanf("%d",&AFFPLATEAU);
+  } while(AFFPLATEAU!=1&&AFFPLATEAU!=2);
+
+  do
+  {
+    printf("\nQu'elle mode de jeux ?");
+    printf("\n1. Mode connaisseur");
+    printf("\n2. Mode didatique");
+    printf("\nVotre choix (1/2) : ");
+    scanf("%d",&CONNAISSEUR);
+  } while(CONNAISSEUR!=1&&CONNAISSEUR!=2);
 
   do
   {
     printf("\nQu'elle est la taille de votre plateau (2-7) : ");
     scanf("%d",&NIVEAU);
   } while(NIVEAU<2||NIVEAU>7);
+}
 
+void play()
+{
   int plateau[NIVEAU][NIVEAU][4];
-
   generePlateau(plateau);
+
+  int nbRot = 0;
+  int nbEch = 0;
 
   do
   {
     affichePlateau(plateau);
-    if (choixJoueur()==1)
-      tournerJoueur(plateau);
+    if (CONNAISSEUR==2)
+      if (choixJoueur()==1)
+      {
+        nbRot++;
+        tournerJoueur(plateau);
+      }
+      else
+      {
+        nbEch++;
+        echangerJoueur(plateau);
+      }
     else
-      echangerJoueur(plateau);
+    {
+      char input[5];
+      printf(">>> ");
+      scanf("%s",input);
+      if (strlen(input)==2)
+      {
+        nbRot++;
+        rotationPiece(plateau,input[0]-'1',input[1]-'a');
+      }
+      else if (strlen(input)==4)
+      {
+        nbEch++;
+        echangePiece(plateau,input[0]-'1',input[1]-'a',input[2]-'1',input[3]-'a');
+      }
+    }
   } while (puzzleTermine(plateau)==-1);
 
   affichePlateau(plateau);
-  printf("\n\nBien Jouer mon cher, tu as gagné!!!");
-
-  putchar('\n');
+  printf("\n\nBien Jouer mon cher, "
+           "\nAvec Un total de %d rotations et %d échanges,"
+           "\nTU AS GAGNEE!!!\n",nbRot,nbEch);
 }
 
 int choixJoueur()
@@ -111,118 +185,6 @@ void echangerJoueur(int plateau[NIVEAU][NIVEAU][4])
   choisirEtiquette(plateau,cp);
   choisirEtiquette(plateau,cp+1);
   echangePiece(plateau,cp[0].x-1,cp[0].y-1,cp[1].x-1,cp[1].y-1);
-}
-
-void affichePlateauAvant(int plateau[NIVEAU][NIVEAU][4])
-{
-  printf("\n-------------------------\n   ");
-  for (int t=0; t<NIVEAU; t++)
-    printf(" %d ",t+1);
-  putchar('\n');
-  for (int t=0; t<NIVEAU; t++)
-  {
-    printf("\n   ");
-    for (int h=0; h<NIVEAU; h++)
-      printf(" %c ",getChar(plateau[h][t][0]));
-    printf("\n %c ",'a'+t);
-    for (int h=0; h<NIVEAU; h++)
-      printf("%c#%c",getChar(plateau[h][t][3]),getChar(plateau[h][t][1]));
-    printf("\n   ");
-    for (int h=0; h<NIVEAU; h++)
-      printf(" %c ",getChar(plateau[h][t][2]));
-    putchar('\n');
-  }
-  printf("-------------------------\n");
-}
-char getChar(int t)
-{
-  if (t>=0&&t<=3)
-    return 'A'+t;
-  return 'X';
-}
-
-void affichePlateau(int plateau[NIVEAU][NIVEAU][4])
-{
-  printf("\n");
-  char* doub[6] = {"\u2554","\u2557","\u255D","\u255A","\u2550","\u2551"};
-  char* simp[7] = {"\u250C","\u2510","\u2518","\u2514","\u2500","\u2502","\u253C"};
-  printf("\n     ");
-  for (int t=0; t<NIVEAU; t++)
-    printf(" %s%s%s%s%s ",doub[0],doub[4],doub[4],doub[4],doub[1]);
-  printf("\n     ");
-  for (int t=0; t<NIVEAU; t++)
-    printf(" %s %d %s ",doub[5],t+1,doub[5]);
-  printf("\n     ");
-  for (int t=0; t<NIVEAU; t++)
-    printf(" %s%s%s%s%s ",doub[3],doub[4],doub[4],doub[4],doub[2]);
-
-  for (int t=0; t<NIVEAU; t++)
-  {
-    printf("\n     ");
-    for (int h=0; h<NIVEAU; h++)
-      printf("  %s%s%s  ",simp[0],simp[4],simp[1]);
-    printf("\n     ");
-    for (int h=0; h<NIVEAU; h++)
-    {
-      char temp[17];
-      getCharN(plateau,h,t,0,temp);
-      printf("  %s%s%s  ",simp[5],temp,simp[5]);
-    }
-    simp[0] = "\u250C"; // wtf...
-    printf("\n%s%s%s%s%s",doub[0],doub[4],doub[4],doub[4],doub[1]);
-    for (int h=0; h<NIVEAU; h++)
-      printf("%s%s%s%s%s%s%s",simp[0],simp[4],simp[6],simp[4],simp[6],simp[4],simp[1]);
-    printf("\n%s %c %s",doub[5],'a'+t,doub[5]);
-    for (int h=0; h<NIVEAU; h++)
-    {
-      char temp[17];
-      getCharN(plateau,h,t,3,temp);
-      printf("%s%s%s#%s",simp[5],temp,simp[5],simp[5]);
-      getCharN(plateau,h,t,1,temp);
-      printf("%s%s",temp,simp[5]);
-    }
-    printf("\n%s%s%s%s%s",doub[3],doub[4],doub[4],doub[4],doub[2]);
-    for (int h=0; h<NIVEAU; h++)
-      printf("%s%s%s%s%s%s%s",simp[3],simp[4],simp[6],simp[4],simp[6],simp[4],simp[2]);
-    printf("\n     ");
-    for (int h=0; h<NIVEAU; h++)
-    {
-      char temp[17];
-      getCharN(plateau,h,t,2,temp);
-      printf("  %s%s%s  ",simp[5],temp,simp[5]);
-    }
-    printf("\n     ");
-    for (int h=0; h<NIVEAU; h++)
-      printf("  %s%s%s  ",simp[3],simp[4],simp[2]);
-  }
-  printf("\n");
-}
-void getCharN(int plateau[NIVEAU][NIVEAU][4],int x, int y, int z, char temp[17])
-{
-  temp[0] = '\e';
-  temp[1] = '[';
-  temp[2] = '4';
-  if (plateau[x][y][z]==*corresp(plateau,x,y,z))
-    temp[3] = '3';
-  else
-    temp[3] = '7';
-  temp[4] = 'm';
-  temp[5] = '\e';
-  temp[6] = '[';
-  temp[7] = '3';
-
-  temp[8] = '0';
-
-  temp[9] = ';';
-  temp[10] = '1';
-  temp[11] = 'm';
-  temp[12] = 'A'+plateau[x][y][z];
-  temp[13] = '\e';
-  temp[14] = '[';
-  temp[15] = '0';
-  temp[16] = 'm';
-  temp[17] = '\0';
-
 }
 
 void generePlateau(int plateau[NIVEAU][NIVEAU][4])
@@ -300,4 +262,105 @@ int puzzleTermine(int plateau[NIVEAU][NIVEAU][4])
         if (plateau[t][h][i]!=*corresp(plateau,t,h,i))
           return -1;
   return 0;
+}
+
+void affichePlateau(int plateau[NIVEAU][NIVEAU][4])
+{
+  if (AFFPLATEAU==1)
+    affichePlateauAme(plateau);
+  else
+    affichePlateauSta(plateau);
+}
+
+void affichePlateauSta(int plateau[NIVEAU][NIVEAU][4])
+{
+  printf("\n-------------------------\n   ");
+  for (int t=0; t<NIVEAU; t++)
+    printf(" %d ",t+1);
+  putchar('\n');
+  for (int t=0; t<NIVEAU; t++)
+  {
+    printf("\n   ");
+    for (int h=0; h<NIVEAU; h++)
+      printf(" %c ",getChar(plateau[h][t][0]));
+    printf("\n %c ",'a'+t);
+    for (int h=0; h<NIVEAU; h++)
+      printf("%c#%c",getChar(plateau[h][t][3]),getChar(plateau[h][t][1]));
+    printf("\n   ");
+    for (int h=0; h<NIVEAU; h++)
+      printf(" %c ",getChar(plateau[h][t][2]));
+    putchar('\n');
+  }
+  printf("-------------------------\n");
+}
+char getChar(int t)
+{
+  if (t>=0&&t<=3)
+    return 'A'+t;
+  return 'X';
+}
+
+void affichePlateauAme(int plateau[NIVEAU][NIVEAU][4])
+{
+  printf("\n");
+  char* doub[6] = {"\u2554","\u2557","\u255D","\u255A","\u2550","\u2551"};
+  char* simp[7] = {"\u250C","\u2510","\u2518","\u2514","\u2500","\u2502","\u253C"};
+  printf("\n     ");
+  for (int t=0; t<NIVEAU; t++)
+    printf(" %s%s%s%s%s ",doub[0],doub[4],doub[4],doub[4],doub[1]);
+  printf("\n     ");
+  for (int t=0; t<NIVEAU; t++)
+    printf(" %s %d %s ",doub[5],t+1,doub[5]);
+  printf("\n     ");
+  for (int t=0; t<NIVEAU; t++)
+    printf(" %s%s%s%s%s ",doub[3],doub[4],doub[4],doub[4],doub[2]);
+
+  for (int t=0; t<NIVEAU; t++)
+  {
+    printf("\n     ");
+    for (int h=0; h<NIVEAU; h++)
+      printf("  %s%s%s  ",simp[0],simp[4],simp[1]);
+    printf("\n     ");
+    for (int h=0; h<NIVEAU; h++)
+    {
+      char temp[17];
+      getCharN(plateau,h,t,0,temp);
+      printf("  %s%s%s  ",simp[5],temp,simp[5]);
+    }
+    simp[0] = "\u250C"; // wtf...
+    printf("\n%s%s%s%s%s",doub[0],doub[4],doub[4],doub[4],doub[1]);
+    for (int h=0; h<NIVEAU; h++)
+      printf("%s%s%s%s%s%s%s",simp[0],simp[4],simp[6],simp[4],simp[6],simp[4],simp[1]);
+    printf("\n%s %c %s",doub[5],'a'+t,doub[5]);
+    for (int h=0; h<NIVEAU; h++)
+    {
+      char temp[17];
+      getCharN(plateau,h,t,3,temp);
+      printf("%s%s%s#%s",simp[5],temp,simp[5],simp[5]);
+      getCharN(plateau,h,t,1,temp);
+      printf("%s%s",temp,simp[5]);
+    }
+    printf("\n%s%s%s%s%s",doub[3],doub[4],doub[4],doub[4],doub[2]);
+    for (int h=0; h<NIVEAU; h++)
+      printf("%s%s%s%s%s%s%s",simp[3],simp[4],simp[6],simp[4],simp[6],simp[4],simp[2]);
+    printf("\n     ");
+    for (int h=0; h<NIVEAU; h++)
+    {
+      char temp[17];
+      getCharN(plateau,h,t,2,temp);
+      printf("  %s%s%s  ",simp[5],temp,simp[5]);
+    }
+    printf("\n     ");
+    for (int h=0; h<NIVEAU; h++)
+      printf("  %s%s%s  ",simp[3],simp[4],simp[2]);
+  }
+  printf("\n");
+}
+void getCharN(int plateau[NIVEAU][NIVEAU][4],int x, int y, int z, char temp[17])
+{
+  sprintf(temp,"\e[40m\e[30;1m%c\e[0m",'A'+plateau[x][y][z]);
+  if (plateau[x][y][z]==*corresp(plateau,x,y,z))
+    temp[3] = '3';
+  else
+    temp[3] = '7';
 }
