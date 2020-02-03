@@ -52,12 +52,11 @@ int main(int argc, char *argv[])
     init();
     play();
 
-    while (getchar() != '\n') ;
+    while (getchar() != '\n') ; // Vide le tampon
 
     printf("\n\nRecommencer (O/N): ");
     scanf("%c",&t);
   } while (t!='N');
-
 
   putchar('\n');
 }
@@ -202,10 +201,15 @@ void generePlateau(int plateau[NIVEAU][NIVEAU][4])
         plateau[t][h][prpl] = n; // met la data dans a cette place
         *corresp(plateau,t,h,prpl) = n; // met aussi la data dans la case correspondante
       }
-  for (int t=0; t<1000; t++)
-    echangePiece(plateau,rand()%NIVEAU,rand()%NIVEAU,rand()%NIVEAU,rand()%NIVEAU);
-  for (int t=0; t<1000; t++)
-    rotationPiece(plateau,rand()%NIVEAU,rand()%NIVEAU);
+  for (int t=0; t<NIVEAU; t++)
+    for (int h=0; h<NIVEAU; h++)
+    {
+      if (rand()%10!=0)
+        echangePiece(plateau,t,h,rand()%NIVEAU,rand()%NIVEAU);
+      if (rand()%10!=0)
+        for (int i=rand()%4; i>0; i--)
+          rotationPiece(plateau,t,h);
+    }
 }
 
 int premierePlace(int piece[4])
@@ -327,7 +331,7 @@ void affichePlateauAme(int plateau[NIVEAU][NIVEAU][4])
       getCharN(plateau,h,t,0,temp);
       printf("  %s%s%s  ",simp[5],temp,simp[5]);
     }
-    simp[0] = "\u250C"; // wtf...
+    /*simp[0] = "\u250C";*/
     printf("\n%s%s%s%s%s",doub[0],doub[4],doub[4],doub[4],doub[1]);
     for (int h=0; h<NIVEAU; h++)
       printf("%s%s%s%s%s%s%s",simp[0],simp[4],simp[6],simp[4],simp[6],simp[4],simp[1]);
